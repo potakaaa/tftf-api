@@ -1,21 +1,35 @@
-# shadcn/ui monorepo template
+# TFTF Edge API
 
-This is a TanStack Start monorepo template with shadcn/ui.
+Clean monorepo for the next version of TFTF Edge API, a jeepney route
+calculation service for Cagayan de Oro.
 
-## Adding components
+## Apps
 
-To add components to your app, run the following command at the root of your `web` app:
+- `apps/api`: FastAPI backend. See [apps/api/README.md](apps/api/README.md).
+- `apps/web`: TanStack Start web app. This will host API documentation later.
+
+## Packages
+
+- `packages/ui`: Shared web UI components.
+- `packages/shared`: Placeholder for shared types and configuration when needed.
+
+## Web Development
+
+Install JavaScript dependencies and start the existing TanStack Start app:
 
 ```bash
-pnpm dlx shadcn@latest add button -c apps/web
+pnpm install
+pnpm --dir apps/web dev
 ```
 
-This will place the ui components in the `packages/ui/src/components` directory.
+## Full Development Environment
 
-## Using components
+Set up the Python API once using [apps/api/README.md](apps/api/README.md), then
+start the API and web app together:
 
-To use the components in your app, import them from the `ui` package.
-
-```tsx
-import { Button } from "@workspace/ui/components/button";
+```bash
+pnpm dev
 ```
+
+Turbo shows `api#dev` and `web#dev` as separate long-running tasks. Each app
+prints request logs in its task output.

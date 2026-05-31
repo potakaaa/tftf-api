@@ -1,0 +1,9 @@
+{
+  "name": "api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": ".venv/bin/uvicorn app.main:app --reload --no-access-log --port 8000",
+    "test": ".venv/bin/python -m pytest"
+  }
+}

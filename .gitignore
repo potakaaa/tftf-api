@@ -4,12 +4,21 @@ dist
 dist-ssr
 *.local
 .env*
+!.env.example
+!**/.env.example
 .tanstack
 .wrangler
 .output
 .vinxi
 __unconfig*
 todos.json
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
 
 # turbo
 .turbo
