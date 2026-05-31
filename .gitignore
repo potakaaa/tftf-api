@@ -20,6 +20,11 @@ __pycache__/
 .pytest_cache/
 .venv/
 
+# native
+apps/api/native/build/
+apps/api/native/bin/*
+!apps/api/native/bin/.gitkeep
+
 # turbo
 .turbo
 

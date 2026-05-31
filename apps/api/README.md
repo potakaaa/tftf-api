@@ -1,35 +1,80 @@
 # TFTF Edge API Backend
 
-FastAPI backend for TFTF route calculation. Route results are mocked while the
-C++ algorithm integration is prepared.
+FastAPI backend for TFTF route calculation. The API invokes the vendored C++
+runtime in `native/` and adapts its output into the public route response.
 
 ## Requirements
 
 - Python 3.11 or newer
+- CMake
+- A C++17 compiler
+- Node.js and pnpm for the cross-platform helper scripts
 
-## Setup
+## Python Setup
 
-From `apps/api`, create and activate a virtual environment, then install the
-application with development dependencies:
+From `apps/api`, create a virtual environment and install development
+dependencies.
+
+macOS and Linux:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python3 -m pip install -e ".[dev]"
+python -m pip install -e ".[dev]"
+```
+
+Windows PowerShell:
+
+```powershell
+py -3 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -e ".[dev]"
 ```
 
 Optionally copy `.env.example` to `.env` to override local settings.
 
-## Run
+## Native Route Runner
 
-From `apps/api`:
+Build the OS-specific native executable from the repository root:
 
 ```bash
-uvicorn app.main:app --reload --no-access-log
+pnpm native:build
+```
+
+Build outputs:
+
+```text
+macOS/Linux: apps/api/native/bin/tftf_runner
+Windows:     apps/api/native/bin/tftf_runner.exe
+```
+
+The executable and CMake build directory are ignored by Git. Each machine
+builds its own binary. No external TFTFGraph repository is required.
+
+## Run
+
+Start the API from the repository root:
+
+```bash
+pnpm --dir apps/api dev
 ```
 
 The API is available at `http://127.0.0.1:8000`. Interactive OpenAPI
 documentation is available at `http://127.0.0.1:8000/docs`.
+
+To start both API and web:
+
+```bash
+pnpm dev
+```
+
+## Test
+
+From the repository root:
+
+```bash
+pnpm --dir apps/api test
+```
 
 ## Endpoints
 
@@ -39,34 +84,22 @@ Health check:
 curl http://127.0.0.1:8000/health
 ```
 
-Mocked route calculation:
+Route calculation:
 
 ```bash
 curl "http://127.0.0.1:8000/api/routes?fromLat=8.50881&fromLong=124.64827&fromName=Bonbon&toLat=8.51133&toLong=124.62429&toName=Westbound%20Bulua%20Terminal&transMeter=100.5&hour=10"
 ```
 
-## Test
+## Configuration
 
-From `apps/api`:
+Settings are loaded from environment variables prefixed with `TFTF_`. See
+`.env.example` for defaults.
 
-```bash
-python3 -m pytest
-```
+`TFTF_RUNNER_DIR` normally does not need to be changed. It is available only
+for intentionally overriding the compatible native runtime directory.
 
-## C++ Algorithm Integration
+## Native Integration
 
-Replace the mocked implementation in `app/services/route_service.py`. The
-service is the integration point for invoking the future C++ executable or
-binding and converting its result into the API response schema.
-
-## Monorepo Development
-
-After completing the API setup once, start both the API and web app from the
-repository root:
-
-```bash
-pnpm dev
-```
-
-Turbo displays each long-running task in its terminal UI. Select `api#dev` or
-`web#dev` to inspect its logs.
+`app/services/route_service.py` invokes the native runner through stdin/stdout.
+The runner receives origin and destination coordinates as JSON and returns
+route segments for conversion into the public API response schema.

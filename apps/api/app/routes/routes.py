@@ -1,15 +1,15 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
 
 from app.schemas.route import RouteRequest, RouteResponse
-from app.services.route_service import get_mocked_route
+from app.services.route_service import RouteServiceError, get_route
 
 router = APIRouter(prefix="/api", tags=["routes"])
 
 
 @router.get("/routes", response_model=RouteResponse, response_model_by_alias=True)
-async def get_routes(
+def get_routes(
     from_lat: Annotated[float, Query(alias="fromLat")],
     from_long: Annotated[float, Query(alias="fromLong")],
     from_name: Annotated[str, Query(alias="fromName")],
@@ -29,4 +29,7 @@ async def get_routes(
         trans_meter=trans_meter,
         hour=hour,
     )
-    return get_mocked_route(request)
+    try:
+        return get_route(request)
+    except RouteServiceError as error:
+        raise HTTPException(status_code=502, detail=str(error)) from error

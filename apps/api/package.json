@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": ".venv/bin/uvicorn app.main:app --reload --no-access-log --port 8000",
-    "test": ".venv/bin/python -m pytest"
+    "dev": "node scripts/run-python.mjs -m uvicorn app.main:app --reload --no-access-log --port 8000",
+    "native:build": "node scripts/build-native.mjs",
+    "test": "node scripts/run-python.mjs -m pytest"
   }
 }

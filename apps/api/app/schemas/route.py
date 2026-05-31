@@ -12,6 +12,27 @@ class RouteRequest(BaseModel):
     hour: int
 
 
+class NativeCoordinate(BaseModel):
+    lat: float
+    lon: float
+
+
+class NativeRouteSegment(BaseModel):
+    route_id: int
+    route_name: str
+    coordinates: list[NativeCoordinate]
+
+
+class NativeTftfResult(BaseModel):
+    found: bool
+    route_segments: list[NativeRouteSegment]
+
+
+class NativeRouteResponse(BaseModel):
+    total_fare: float
+    tftf: NativeTftfResult
+
+
 class Origin(BaseModel):
     latitude: float = Field(serialization_alias="Lattitude")
     longitude: float = Field(serialization_alias="Longitude")
