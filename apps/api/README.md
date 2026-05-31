@@ -31,6 +31,12 @@ py -3 -m venv .venv
 python -m pip install -e ".[dev]"
 ```
 
+Or from the repository root:
+
+```bash
+pnpm --dir apps/api setup
+```
+
 Optionally copy `.env.example` to `.env` to override local settings.
 
 ## Native Route Runner
@@ -74,6 +80,12 @@ From the repository root:
 
 ```bash
 pnpm --dir apps/api test
+```
+
+To run the full repository CI baseline locally:
+
+```bash
+pnpm check
 ```
 
 ## Endpoints

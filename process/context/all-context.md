@@ -145,7 +145,9 @@ API settings live in `apps/api/app/core/config.py`. Reference defaults are in
 
 ```bash
 pnpm install
+pnpm --dir apps/api setup
 pnpm native:build
+pnpm check
 pnpm dev
 pnpm --dir apps/api test
 pnpm --dir apps/web build

@@ -45,6 +45,12 @@ python -m pip install -e ".[dev]"
 cd ../..
 ```
 
+Or use the repo-managed bootstrap command from the root:
+
+```bash
+pnpm --dir apps/api setup
+```
+
 Build the OS-specific native route runner:
 
 ```bash
@@ -52,6 +58,14 @@ pnpm native:build
 ```
 
 Compiled native files are generated locally and intentionally ignored by Git.
+
+## Verification
+
+Run the same checks that GitHub Actions uses:
+
+```bash
+pnpm check
+```
 
 ## Development
 

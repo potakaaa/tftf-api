@@ -4,10 +4,12 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
+    "check": "pnpm lint && pnpm typecheck && pnpm --dir apps/web build && pnpm native:build && pnpm test",
     "dev": "turbo dev",
     "lint": "turbo lint",
     "native:build": "pnpm --dir apps/api native:build",
     "format": "turbo format",
+    "test": "pnpm --dir apps/api test",
     "typecheck": "turbo typecheck"
   },
   "devDependencies": {
