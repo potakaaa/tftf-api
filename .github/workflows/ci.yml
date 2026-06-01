@@ -72,7 +72,7 @@ jobs:
 
       - name: Set up API virtual environment
         working-directory: apps/api
-        run: pnpm setup
+        run: pnpm run setup
 
       - name: Run API tests
         run: pnpm test

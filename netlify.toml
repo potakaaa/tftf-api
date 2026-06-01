@@ -1,0 +1,7 @@
+[build]
+  command = "pnpm --filter web build"
+  publish = "apps/web/dist/client"
+
+[build.environment]
+  NODE_VERSION = "22"
+  PNPM_VERSION = "10.33.4"
