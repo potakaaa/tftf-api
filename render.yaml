@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: tftf-edge-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: ./apps/api
+    healthCheckPath: /health
+    envVars:
+      - key: TFTF_CORS_ORIGINS
+        sync: false
+      - key: TFTF_LOG_LEVEL
+        value: INFO
+      - key: TFTF_RUNNER_TIMEOUT_SECONDS
+        value: "10"

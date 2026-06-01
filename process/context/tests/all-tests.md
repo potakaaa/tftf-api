@@ -41,6 +41,8 @@ test gaps.
 
 | Scope | Runner | Command | Notes |
 |---|---|---|---|
+| Full CI baseline | mixed | `pnpm check` | Runs lint, typecheck, web build, native build, and API tests |
+| API setup | Python venv + pip | `pnpm --dir apps/api setup` | Creates `apps/api/.venv` if missing and installs `.[dev]` |
 | API | pytest | `pnpm --dir apps/api test` | Uses `apps/api/.venv` |
 | API health only | pytest | `pnpm --dir apps/api test -- tests/test_health.py` | ASGI transport, no server required |
 | Route service only | pytest | `pnpm --dir apps/api test -- tests/test_route_service.py` | Native subprocess is stubbed |
@@ -72,11 +74,10 @@ test gaps.
 - No direct HTTP test covers `GET /api/routes`.
 - No real native-runner integration smoke test exists.
 - No automated web tests exist.
-- No CI workflow is present in `.github/`.
+- GitHub Actions CI lives in `.github/workflows/ci.yml` and covers lint, typecheck, web build, API tests, and native runner builds across Ubuntu, macOS, and Windows.
 - Multi-locality behavior is not implemented or tested yet.
 
 ## Update Triggers
 
 Update this file when test files, runner commands, CI, virtual-environment
 requirements, or verification expectations change.
-

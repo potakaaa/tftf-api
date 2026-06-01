@@ -25,6 +25,7 @@
     "tailwindcss": "^4"
   },
   "devDependencies": {
+    "@netlify/vite-plugin-tanstack-start": "latest",
     "@tanstack/devtools-vite": "latest",
     "@tanstack/eslint-config": "latest",
     "@types/node": "^22",

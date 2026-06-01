@@ -31,6 +31,12 @@ py -3 -m venv .venv
 python -m pip install -e ".[dev]"
 ```
 
+Or from the repository root:
+
+```bash
+pnpm --dir apps/api setup
+```
+
 Optionally copy `.env.example` to `.env` to override local settings.
 
 ## Native Route Runner
@@ -76,6 +82,12 @@ From the repository root:
 pnpm --dir apps/api test
 ```
 
+To run the full repository CI baseline locally:
+
+```bash
+pnpm check
+```
+
 ## Endpoints
 
 Health check:
@@ -103,3 +115,12 @@ for intentionally overriding the compatible native runtime directory.
 `app/services/route_service.py` invokes the native runner through stdin/stdout.
 The runner receives origin and destination coordinates as JSON and returns
 route segments for conversion into the public API response schema.
+
+## Render Deployment
+
+Render deployment is configured with [render.yaml](/Volumes/Extreme_SSD/Projects/Tanstack%20Start/tftf-api/render.yaml) and [apps/api/Dockerfile](/Volumes/Extreme_SSD/Projects/Tanstack%20Start/tftf-api/apps/api/Dockerfile).
+
+- Runtime: Docker
+- Health check: `/health`
+- Required environment variable: `TFTF_CORS_ORIGINS`
+- Example value: `["https://your-site.netlify.app"]`

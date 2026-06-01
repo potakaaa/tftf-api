@@ -7,6 +7,7 @@ dist-ssr
 !.env.example
 !**/.env.example
 .tanstack
+.netlify
 .wrangler
 .output
 .vinxi
