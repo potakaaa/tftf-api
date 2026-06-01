@@ -1,6 +1,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <chrono>
+#include <functional>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -40,6 +41,14 @@ void TFTFGraph::setRoutePath(int routeId, const std::vector<Coordinate> &coordin
     else
     {
         std::cerr << "route ID " << routeId << " not found.\n";
+    }
+}
+
+void TFTFGraph::clearTransfers()
+{
+    for (auto &[routeId, route] : routes)
+    {
+        route.edges.clear();
     }
 }
 
@@ -258,11 +267,23 @@ std::vector<RoutePathInstruction> TFTFGraph::constructRoutePathInstructions(
 
     return routeInstructions;
 }
-void TFTFGraph::createTransfersFromCoordinates(float transferRangeMeters)
+void TFTFGraph::createTransfersFromCoordinates(float transferRangeMeters, ProgressCallback progress)
 {
+    auto emitProgress = [&](const std::string &stage, size_t completed, size_t total, const std::string &message)
+    {
+        if (progress)
+        {
+            progress(ProgressUpdate{stage, completed, total, message});
+        }
+    };
+
     std::unordered_map<std::pair<int, int>, std::vector<std::pair<int, Coordinate>>, PairHash> spatialGrid;
+    size_t routeCount = routes.size();
+
+    emitProgress("densify_routes", 0, routeCount, "Preparing route paths for transfer generation");
 
     // Step 1: Populate spatial grid with densified paths
+    size_t densifiedRoutes = 0;
     for (auto &[routeID, route] : routes)
     {
         auto densePath = densifyPath(route.path, 25.0f);
@@ -271,6 +292,9 @@ void TFTFGraph::createTransfersFromCoordinates(float transferRangeMeters)
             auto cell = hashCoordinate(coord, transferRangeMeters);
             spatialGrid[cell].emplace_back(routeID, coord);
         }
+
+        ++densifiedRoutes;
+        emitProgress("densify_routes", densifiedRoutes, routeCount, "Prepared route paths for transfer generation");
     }
 
     // Step 2: Store best transfers per (fromID, toID)
@@ -284,6 +308,8 @@ void TFTFGraph::createTransfersFromCoordinates(float transferRangeMeters)
     std::map<std::pair<int, int>, TransferCandidate> bestTransfers;
 
     // Step 3: Find closest coord pairs within range
+    emitProgress("generate_transfers", 0, routeCount, "Scanning route pairs for transfer candidates");
+    size_t scannedRoutes = 0;
     for (const auto &[fromID, fromRoute] : routes)
     {
         for (const auto &fromCoord : fromRoute.path)
@@ -317,6 +343,9 @@ void TFTFGraph::createTransfersFromCoordinates(float transferRangeMeters)
                 }
             }
         }
+
+        ++scannedRoutes;
+        emitProgress("generate_transfers", scannedRoutes, routeCount, "Scanned route transfer candidates");
     }
 
     // Step 4: Create edges using closest coord pair
@@ -339,6 +368,8 @@ void TFTFGraph::createTransfersFromCoordinates(float transferRangeMeters)
 
         addEdge(fromID, toID, zone1, zone2, candidate.dist);
     }
+
+    emitProgress("generate_transfers", routeCount, routeCount, "Transfer generation completed");
 }
 
 std::vector<int> TFTFGraph::getNearbyRoutes(const Coordinate &coord, float maxDistanceMeters)
@@ -776,19 +807,12 @@ void saveGraphToDisk(const TFTFGraph &graph, const std::string &filename)
     std::cout << "Graph saved to " << filename << "\n";
 }
 
-TFTFGraph loadGraphFromDisk(const std::string &filename)
+TFTFGraph loadGraphFromJson(const json &j)
 {
     TFTFGraph graph;
-    std::ifstream inFile(filename);
-    if (!inFile.is_open())
-    {
-        std::cerr << "Failed to open file: " << filename << "\n";
+    if (!j.contains("routes")) {
         return graph;
     }
-
-    json j;
-    inFile >> j;
-    inFile.close();
 
     for (const auto &routeJson : j["routes"])
     {
@@ -832,8 +856,82 @@ TFTFGraph loadGraphFromDisk(const std::string &filename)
             routesMap.at(routeId).edges.push_back(edge);
         }
     }
+    
+    return graph;
+}
+
+TFTFGraph loadGraphFromDisk(const std::string &filename)
+{
+    std::ifstream inFile(filename);
+    if (!inFile.is_open())
+    {
+        std::cerr << "Failed to open file: " << filename << "\n";
+        return TFTFGraph();
+    }
+
+    json j;
+    inFile >> j;
+    inFile.close();
+
+    TFTFGraph graph = loadGraphFromJson(j);
 
     std::cout << "Graph loaded from " << filename << "\n";
+    return graph;
+}
+
+TFTFGraph loadGraphFromGeoJSONObj(const json &geojson)
+{
+    TFTFGraph graph;
+    if (!geojson.contains("features"))
+    {
+        return graph;
+    }
+
+    const auto &features = geojson["features"];
+    int routeId = 0;
+
+    for (const auto &feature : features)
+    {
+        if (feature["geometry"]["type"] != "LineString")
+            continue;
+
+        std::vector<Coordinate> routePath;
+        const auto &coords = feature["geometry"]["coordinates"];
+        for (const auto &coord : coords)
+        {
+            double lon = coord[0].get<double>();
+            double lat = coord[1].get<double>();
+            routePath.emplace_back(Coordinate{lat, lon});
+        }
+
+        std::string routeName = "Route_" + std::to_string(routeId);
+        if (feature.contains("properties") && feature["properties"].contains("name"))
+        {
+            routeName = feature["properties"]["name"];
+        }
+
+        graph.addRoute(routeId, routeName);
+        graph.setRoutePath(routeId, routePath);
+        routeId++;
+    }
+
+    return graph;
+}
+
+TFTFGraph loadGraphFromGeoJSON(const std::string &filepath)
+{
+    std::ifstream file(filepath);
+    if (!file.is_open())
+    {
+        std::cerr << "Failed to open GeoJSON file: " << filepath << std::endl;
+        return TFTFGraph();
+    }
+
+    json geojson;
+    file >> geojson;
+    
+    TFTFGraph graph = loadGraphFromGeoJSONObj(geojson);
+    std::cout << "Graph loaded from GeoJSON " << filepath << "\n";
     return graph;
 }
 json generateRoutePathGeoJSON(

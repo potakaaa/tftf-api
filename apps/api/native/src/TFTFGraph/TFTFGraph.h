@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <functional>
 #include <unordered_map>
 #include <limits>
 #include "../json.hpp"
@@ -46,6 +47,16 @@ struct RoutePathInstruction{
     std::vector<Coordinate> path;
 };
 
+struct ProgressUpdate
+{
+    std::string stage;
+    size_t completed;
+    size_t total;
+    std::string message;
+};
+
+using ProgressCallback = std::function<void(const ProgressUpdate &)>;
+
 struct RouteNode
 {
     int routeId;
@@ -60,8 +71,9 @@ class TFTFGraph
 public:
     void addRoute(int id, const std::string &name);
     void setRoutePath(int routeId, const std::vector<Coordinate> &coordinates);
+    void clearTransfers();
     std::vector<RoutePathInstruction> constructRoutePathInstructions(const std::vector<TFTFEdge> &path) const;
-    void createTransfersFromCoordinates(float transferRangeMeters);
+    void createTransfersFromCoordinates(float transferRangeMeters, ProgressCallback progress = {});
     std::vector<int> getNearbyRoutes(const Coordinate &coord, float maxDistanceMeters);
     double calculateFareFromInstructions(const std::vector<RoutePathInstruction> &routeInstructions);
     std::vector<TFTFEdge> calculateRouteFromCoordinates(const Coordinate &startCoord, const Coordinate &endCoord);
@@ -77,6 +89,9 @@ private:
     std::unordered_map<int, RouteNode> routes;
 };
 TFTFGraph loadGraphFromDisk(const std::string& filename);
+TFTFGraph loadGraphFromGeoJSON(const std::string& filename);
+TFTFGraph loadGraphFromGeoJSONObj(const json& geojson);
+TFTFGraph loadGraphFromJson(const json& j);
 void saveGraphToDisk(const TFTFGraph& graph, const std::string& filename);
 json generateRoutePathGeoJSON(
     const std::vector<RoutePathInstruction> &instructions,

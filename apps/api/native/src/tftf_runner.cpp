@@ -2,6 +2,7 @@
 #include "TFTFGraph/TFTFGraph.h"
 #include "json.hpp"
 #include <cmath>
+#include <cstdlib>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -22,16 +23,49 @@ json serializeCoordinates(const std::vector<Coordinate> &coordinates)
     return output;
 }
 
+std::string resolveGraphPath(const json &request)
+{
+    if (request.contains("graph_path") && request["graph_path"].is_string())
+    {
+        return request["graph_path"].get<std::string>();
+    }
+
+    if (const char *graphPath = std::getenv("TFTF_GRAPH_PATH"))
+    {
+        if (*graphPath != '\0')
+        {
+            return std::string(graphPath);
+        }
+    }
+
+    return "data/graph.json";
+}
+
 int main()
 {
-    graph = loadGraphFromDisk("data/graph.json");
     std::string line;
+    std::string loadedGraphPath;
 
     while (std::getline(std::cin, line))
     {
         try
         {
             json request = json::parse(line);
+            if (request.contains("graph_data"))
+            {
+                graph = loadGraphFromJson(request["graph_data"]);
+                loadedGraphPath = "IN_MEMORY";
+            }
+            else
+            {
+                std::string graphPath = resolveGraphPath(request);
+                if (graph.getRoutes().empty() || (graphPath != loadedGraphPath && graphPath != "IN_MEMORY"))
+                {
+                    graph = loadGraphFromDisk(graphPath);
+                    loadedGraphPath = graphPath;
+                }
+            }
+
             Coordinate start = {request["start"]["lat"], request["start"]["lon"]};
             Coordinate end = {request["end"]["lat"], request["end"]["lon"]};
             std::vector<TFTFEdge> path = graph.calculateRouteFromCoordinates(start, end);
