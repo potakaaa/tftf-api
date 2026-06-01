@@ -4,7 +4,7 @@ services:
     runtime: docker
     plan: free
     dockerfilePath: ./apps/api/Dockerfile
-    dockerContext: ./apps/api
+    dockerContext: .
     healthCheckPath: /health
     envVars:
       - key: TFTF_CORS_ORIGINS
