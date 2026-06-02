@@ -2,7 +2,6 @@ import {
   RiArrowRightUpLine,
   RiExternalLinkLine,
   RiMoonClearLine,
-  RiRouteLine,
   RiSunLine,
 } from "@remixicon/react"
 import { Button } from "@workspace/ui/components/button"
@@ -22,8 +21,13 @@ export function SiteHeader({
     <header className="sticky top-0 z-20 border-b border-border/80 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5 lg:px-8">
         <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-2xl bg-foreground text-primary shadow-sm">
-            <RiRouteLine className="size-5" />
+          <div className="flex size-10 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-sm">
+            <img
+              src="/icon.png"
+              alt=""
+              className="size-full scale-x-[1.12] scale-y-[1.04]"
+              aria-hidden="true"
+            />
           </div>
           <div>
             <div className="flex items-center gap-2">
