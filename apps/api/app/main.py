@@ -6,6 +6,7 @@ from starlette.requests import Request
 
 from app.core.config import settings
 from app.core.logging import configure_logging, get_logger
+from app.routes.graphs import router as graphs_router
 from app.routes.health import router as health_router
 from app.routes.routes import router as routes_router
 
@@ -24,6 +25,7 @@ app.add_middleware(
 )
 
 app.include_router(health_router)
+app.include_router(graphs_router)
 app.include_router(routes_router)
 
 

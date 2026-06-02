@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     cors_origin_regex: str = r"http://(localhost|127\.0\.0\.1)(:\d+)?"
     log_level: str = "INFO"
     runner_dir: Path = DEFAULT_RUNNER_DIR
+    graph_path: Path | None = None
     runner_timeout_seconds: float = 10.0
 
     model_config = SettingsConfigDict(

@@ -23,7 +23,9 @@ The cross-platform build script runs CMake and produces:
 
 ```text
 macOS/Linux: apps/api/native/bin/tftf_runner
+macOS/Linux: apps/api/native/bin/tftf_graph_builder
 Windows:     apps/api/native/bin/tftf_runner.exe
+Windows:     apps/api/native/bin/tftf_graph_builder.exe
 ```
 
 Generated files under `build/` and `bin/` are ignored. Do not commit compiled
@@ -38,9 +40,13 @@ native/
     graph.json
   src/
     tftf_runner.cpp
+    tftf_graph_builder.cpp
     json.hpp
     TFTFGraph/
 ```
 
 The runner reads `data/graph.json`, accepts one JSON request per stdin line,
 and writes one JSON response per stdout line.
+
+The graph builder accepts one JSON request on stdin, emits JSON progress events
+as NDJSON on stdout, and finishes with a final completion event.

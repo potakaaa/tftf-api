@@ -24,4 +24,4 @@ function run(args) {
 }
 
 run(["-S", nativeDir, "-B", buildDir])
-run(["--build", buildDir, "--config", "Release", "--target", "tftf_runner"])
+run(["--build", buildDir, "--config", "Release", "--target", "tftf_runner", "tftf_graph_builder"])
