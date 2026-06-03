@@ -2,7 +2,14 @@ cmake_minimum_required(VERSION 3.16)
 
 project(TFTFNativeRunner LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 20)
+# Allow overriding the C++ standard via environment variable TFTF_CXX_STANDARD
+# so developers can build with C++17 or C++20 depending on their toolchain.
+if(DEFINED ENV{TFTF_CXX_STANDARD})
+    set(CMAKE_CXX_STANDARD $ENV{TFTF_CXX_STANDARD})
+else()
+    # default to C++17 for maximum compatibility
+    set(CMAKE_CXX_STANDARD 17)
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -35,8 +42,13 @@ set_target_properties(tftf_graph_builder PROPERTIES
 )
 
 if(MSVC)
-    target_compile_options(tftf_runner PRIVATE /W4)
-    target_compile_options(tftf_graph_builder PRIVATE /W4)
+    # Add /std:c++20 only when C++20 (or newer) is requested — older toolchains
+    # may not support this flag.
+    if (CMAKE_CXX_STANDARD GREATER_EQUAL 20)
+        target_compile_options(tftf_runner PRIVATE /W4 /std:c++20)
+    else()
+        target_compile_options(tftf_runner PRIVATE /W4)
+    endif()
 else()
     target_compile_options(tftf_runner PRIVATE -Wall -Wextra)
     target_compile_options(tftf_graph_builder PRIVATE -Wall -Wextra)
