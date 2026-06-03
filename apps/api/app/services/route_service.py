@@ -38,6 +38,8 @@ def _run_native_route(request: RouteRequest) -> NativeRouteResponse:
         "start": {"lat": request.from_lat, "lon": request.from_long},
         "end": {"lat": request.to_lat, "lon": request.to_long},
     }
+    if settings.graph_path is not None:
+        payload["graph_path"] = str(settings.graph_path)
 
     try:
         process = subprocess.run(

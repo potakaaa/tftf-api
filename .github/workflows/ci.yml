@@ -72,7 +72,7 @@ jobs:
 
       - name: Set up API virtual environment
         working-directory: apps/api
-        run: pnpm setup
+        run: pnpm run setup
 
       - name: Run API tests
         run: pnpm test
@@ -114,6 +114,8 @@ jobs:
         run: |
           if [[ "${{ runner.os }}" == "Windows" ]]; then
             test -f apps/api/native/bin/tftf_runner.exe
+            test -f apps/api/native/bin/tftf_graph_builder.exe
           else
             test -f apps/api/native/bin/tftf_runner
+            test -f apps/api/native/bin/tftf_graph_builder
           fi
